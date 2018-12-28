@@ -1,0 +1,219 @@
+import React from 'react'
+import { Map, Marker } from 'react-amap'
+import _ from 'lodash'
+import classNames from 'classnames'
+import PropTypes from 'prop-types'
+import './index.less'
+
+const url = 'https://restapi.amap.com/v3/assistant/inputtips'
+const urlRegeo = 'https://restapi.amap.com/v3/geocode/regeo'
+const originCenter = { longitude: 113.942435, latitude: 22.535896 }
+
+class GmMap extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      center: props.center === undefined ? originCenter : props.center,
+      keywords: props.mapAddress,
+      tips: [],
+      showList: false,
+      showWarning: props.warning && props.center === undefined,
+      iptFocus: false
+    }
+    this.hasInitialCenter = !!props.center
+    this.useOnGetLocation = false
+    // 是否调用了getLocation
+    this.hasCallBack = false
+    // 若center的经纬度是null，null被认为错误
+    // map实例
+    this.map = null
+    this.mapEvents = {
+      created: m => {
+        this.map = m
+        if (!this.hasInitialCenter && !_.isEqual(this.props.center, originCenter)) this.useOnGetLocation = true
+      },
+      mapmove: () => {
+        const center = this.map.getCenter()
+        const preCenter = this.state.center
+        this.debounceHandleMapMove(center)
+        // 只有满足条件才setstate，因为传入Map组件的center是一个对象
+        // 检查发现无论这个center的经纬度是否与之前相等，都会导致Map内部去触发mapmove事件，最终导致死循环
+        if (!this.hasInitialCenter && !this.useOnGetLocation && this.props.center) return
+        if (preCenter.longitude !== center.lng && preCenter.latitude !== center.lat) {
+          this.setState({
+            center: {
+              longitude: center.lng,
+              latitude: center.lat
+            }
+          })
+        }
+      }
+    }
+
+    this.debounceHandleMapMove = _.debounce(this.handleMapMove, 80)
+    this.debounceGetTips = _.debounce(this.getTips, 80)
+  }
+
+  componentDidUpdate (preProps) {
+    const { center, mapAddress } = this.props
+    const stateCenter = this.state.center
+    // 当props的center更新时
+    if (center && (!preProps.center || (preProps.center.latitude !== center.latitude || preProps.center.longitude !== center.longitude))) {
+      // 性能优化
+      const centerDiff = stateCenter.latitude !== center.latitude && stateCenter.longitude !== center.longitude
+      if (!this.useOnGetLocation && centerDiff) {
+        this.setState({
+          center,
+          showWarning: false,
+          keywords: mapAddress
+        })
+      }
+    }
+  }
+
+  handleMapMove = async center => {
+    if (!this.hasInitialCenter && !this.useOnGetLocation && this.props.center) {
+      this.useOnGetLocation = true
+      return
+    }
+    const data = await window.fetch(`${urlRegeo}?key=${this.props.amapkey}&location=${center.lng},${center.lat}`).then(res => res.json()).catch(err => { console.error(err) })
+    if (data.status === '1') {
+      const keywords = data.regeocode.formatted_address
+      this.setState({
+        keywords,
+        showWarning: false
+      })
+      this.debounceGetTips(keywords)
+      this.props.onGetLocation({
+        ...this.state.center,
+        address: keywords
+      })
+      this.hasCallBack = true
+    }
+  }
+
+  async getTips (value) {
+    const data = await window.fetch(`${url}?key=${this.props.amapkey}&keywords=${value}`).then(res => res.json()).catch(err => { console.error(err) })
+    if (data.status === '1') {
+      // 过滤掉不合法的item
+      const tips = _.filter(data.tips, item => typeof item.id === 'string')
+      this.setState({
+        tips
+      })
+    }
+  }
+
+  handleIptBlur = () => {
+    const { warning, center } = this.props
+    this.setState({
+      iptFocus: false,
+      showWarning: warning && !this.hasCallBack && !center
+    })
+  }
+
+  handleIptFocus = () => {
+    this.setState({ showList: true, showWarning: false, iptFocus: true })
+  }
+
+  handleInputChange = e => {
+    const value = e.target.value
+    this.setState({
+      keywords: value
+    })
+    this.debounceGetTips(value)
+  }
+
+  handleCleanKeywords = () => { this.setState({ keywords: '', tips: [] }) }
+
+  async handleTipsClick (item) {
+    let arr = []
+    arr = item.location.split(',')
+    this.setState({
+      center: {
+        longitude: arr[0],
+        latitude: arr[1]
+      },
+      keywords: `${item.district}${item.name}`,
+      showList: false
+    })
+    this.debounceGetTips(`${item.district}${item.name}`)
+  }
+
+  render () {
+    const { keywords, tips, showWarning, iptFocus, center } = this.state
+    const { placeholder, inputFocusColor } = this.props
+
+    return (
+      <div className='gm-map'>
+        <div className='gm-map-ipt-wrap'>
+          <input
+            className={classNames('gm-map-ipt')}
+            style={{
+              border: iptFocus && inputFocusColor ? `1px solid ${inputFocusColor}` : null
+            }}
+            type='text'
+            placeholder={placeholder}
+            value={keywords}
+            onFocus={this.handleIptFocus}
+            onBlur={this.handleIptBlur}
+            onChange={this.handleInputChange}
+          />
+          {
+            keywords && keywords.length
+              ? <i
+                onClick={this.handleCleanKeywords}
+                className={classNames('gm-map-icon', 'xfont', 'xfont-close-circle')}
+              />
+              : null
+          }
+        </div>
+        <div className='gm-map-amap'>
+          <Map
+            zoom={this.props.zoom}
+            center={center}
+            events={this.mapEvents}
+            amapkey={this.props.amapkey}>
+            <Marker
+              position={center}
+            />
+          </Map>
+        </div>
+        {this.state.showList && tips.length
+          ? <ul className='gm-map-result'>
+            {_.map(tips, item => {
+              return <li
+                className='gm-map-result-item'
+                onClick={this.handleTipsClick.bind(this, item)}
+                key={`${item.district}${item.name}`}
+              >
+                <div className='gm-map-result-name'>{item.name}</div>
+                <div className='gm-map-result-district'>{`${item.district}${item.address}`}</div>
+              </li>
+            })}
+          </ul>
+          : null}
+        {showWarning
+          ? <div className='gm-map-warning'>
+            {'(当前地址信息无法获取位置，请重新输入地址或拖动地图至正确位置保存)'}
+          </div> : null}
+      </div>
+    )
+  }
+}
+
+GmMap.propTypes = {
+  center: PropTypes.objectOf(PropTypes.number),
+  onGetLocation: PropTypes.func.isRequired,
+  zoom: PropTypes.number,
+  inputFocusColor: PropTypes.string,
+  amapkey: PropTypes.string.isRequired,
+  warning: PropTypes.bool,
+  placeholder: PropTypes.string,
+  mapAddress: PropTypes.string
+}
+
+GmMap.defaultProps = {
+  zoom: 16
+}
+
+export default GmMap

@@ -3,9 +3,10 @@
 .DS_Store
 /npm-debug.log
 /build
-/webpack-assets.js
-node_modules/
+/demo
+/deploy
+/docs
 package-lock.json
 logs
 /.stylelintcache
-.eslintcache
+/.babelrc
