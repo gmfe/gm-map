@@ -30,7 +30,9 @@ class GmMap extends React.Component {
     this.mapEvents = {
       created: m => {
         this.map = m
-        if (!this.hasInitialCenter && !_.isEqual(this.props.center, originCenter)) this.useOnGetLocation = true
+        const { center } = this.props
+        // 处理获取地图实例比获取props.center慢的特殊情况
+        if (!this.hasInitialCenter && center && !_.isEqual(center, originCenter)) this.useOnGetLocation = true
       },
       mapmove: () => {
         const center = this.map.getCenter()
