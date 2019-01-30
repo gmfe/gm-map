@@ -7,13 +7,12 @@ import './index.less'
 
 const url = 'https://restapi.amap.com/v3/assistant/inputtips'
 const urlRegeo = 'https://restapi.amap.com/v3/geocode/regeo'
-const originCenter = { longitude: 113.942435, latitude: 22.535896 }
 
 class GmMap extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      center: props.center === undefined ? originCenter : props.center,
+      center: props.center,
       keywords: props.mapAddress,
       tips: [],
       showList: false,
@@ -24,15 +23,13 @@ class GmMap extends React.Component {
     this.useOnGetLocation = false
     // 是否调用了getLocation
     this.hasCallBack = false
-    // 若center的经纬度是null，null被认为错误
     // map实例
     this.map = null
     this.mapEvents = {
       created: m => {
         this.map = m
-        const { center } = this.props
         // 处理获取地图实例比获取props.center慢的特殊情况
-        if (!this.hasInitialCenter && center && !_.isEqual(center, originCenter)) this.useOnGetLocation = true
+        if (!this.hasInitialCenter && this.props.center && this.state.center) this.useOnGetLocation = true
       },
       mapmove: () => {
         const center = this.map.getCenter()
@@ -41,7 +38,7 @@ class GmMap extends React.Component {
         // 只有满足条件才setstate，因为传入Map组件的center是一个对象
         // 检查发现无论这个center的经纬度是否与之前相等，都会导致Map内部去触发mapmove事件，最终导致死循环
         if (!this.hasInitialCenter && !this.useOnGetLocation && this.props.center) return
-        if (preCenter.longitude !== center.lng && preCenter.latitude !== center.lat) {
+        if (!preCenter || (preCenter.longitude !== center.lng && preCenter.latitude !== center.lat)) {
           this.setState({
             center: {
               longitude: center.lng,
@@ -62,7 +59,7 @@ class GmMap extends React.Component {
     // 当props的center更新时
     if (center && (!preProps.center || (preProps.center.latitude !== center.latitude || preProps.center.longitude !== center.longitude))) {
       // 性能优化
-      const centerDiff = stateCenter.latitude !== center.latitude && stateCenter.longitude !== center.longitude
+      const centerDiff = !stateCenter || (stateCenter.latitude !== center.latitude && stateCenter.longitude !== center.longitude)
       if (!this.useOnGetLocation && centerDiff) {
         this.setState({
           center,
@@ -144,7 +141,8 @@ class GmMap extends React.Component {
   render () {
     const { keywords, tips, showWarning, iptFocus, center } = this.state
     const { placeholder, inputFocusColor } = this.props
-
+    const mapCenter = center ? { center } : {}
+    const markerCenter = center ? { position: center } : {}
     return (
       <div className='gm-map'>
         <div className='gm-map-ipt-wrap'>
@@ -172,11 +170,11 @@ class GmMap extends React.Component {
         <div className='gm-map-amap'>
           <Map
             zoom={this.props.zoom}
-            center={center}
+            {...mapCenter}
             events={this.mapEvents}
             amapkey={this.props.amapkey}>
             <Marker
-              position={center}
+              {...markerCenter}
             />
           </Map>
         </div>
