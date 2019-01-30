@@ -169,6 +169,7 @@ class GmMap extends React.Component {
         </div>
         <div className='gm-map-amap'>
           <Map
+            version='1.4.6'
             zoom={this.props.zoom}
             {...mapCenter}
             events={this.mapEvents}
