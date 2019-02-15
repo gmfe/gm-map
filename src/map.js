@@ -17,8 +17,11 @@ class GmMap extends React.Component {
       tips: [],
       showList: false,
       showWarning: props.warning && props.center === undefined,
-      iptFocus: false
+      iptFocus: false,
+      // 展开地图
+      expand: false
     }
+    this.iptRef = React.createRef()
     this.hasInitialCenter = !!props.center
     this.useOnGetLocation = false
     // 是否调用了getLocation
@@ -138,8 +141,21 @@ class GmMap extends React.Component {
     this.debounceGetTips(`${item.district}${item.name}`)
   }
 
+  handleExpand = () => {
+    this.setState({
+      expand: true
+    })
+  }
+
+  handleShowWarning = () => {
+    this.iptRef.current.focus()
+    this.setState({
+      showWarning: false
+    })
+  }
+
   render () {
-    const { keywords, tips, showWarning, iptFocus, center } = this.state
+    const { keywords, tips, showWarning, iptFocus, center, expand } = this.state
     const { placeholder, inputFocusColor } = this.props
     const mapCenter = center ? { center } : {}
     const markerCenter = center ? { position: center } : {}
@@ -157,6 +173,7 @@ class GmMap extends React.Component {
             onFocus={this.handleIptFocus}
             onBlur={this.handleIptBlur}
             onChange={this.handleInputChange}
+            ref={this.iptRef}
           />
           {
             keywords && keywords.length
@@ -194,9 +211,18 @@ class GmMap extends React.Component {
           </ul>
           : null}
         {showWarning
-          ? <div className='gm-map-warning'>
+          ? <div className='gm-map-warning' onClick={this.handleShowWarning}>
             {'(当前地址信息无法获取位置，请重新输入地址或拖动地图至正确位置保存)'}
           </div> : null}
+        {expand
+          ? null
+          : <div className='gm-map-expand' onClick={this.handleExpand}>
+            <div
+              className='gm-map-expand-tip'
+              style={{ color: inputFocusColor || '#000' }}>
+              {'点击解锁后，可拖动修改'}
+            </div>
+          </div>}
       </div>
     )
   }
