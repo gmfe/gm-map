@@ -23,9 +23,7 @@ class GmMap extends React.Component {
     }
     this.iptRef = React.createRef()
     this.hasInitialCenter = !!props.center
-    this.useOnGetLocation = false
-    // 是否调用了getLocation
-    this.hasCallBack = false
+    this.useOnGetLocation = false // 是否调用了getLocation
     // map实例
     this.map = null
     this.mapEvents = {
@@ -74,10 +72,6 @@ class GmMap extends React.Component {
   }
 
   handleMapMove = async center => {
-    if (!this.hasInitialCenter && !this.useOnGetLocation && this.props.center) {
-      this.useOnGetLocation = true
-      return
-    }
     const data = await window.fetch(`${urlRegeo}?key=${this.props.amapkey}&location=${center.lng},${center.lat}`).then(res => res.json()).catch(err => { console.error(err) })
     if (data.status === '1') {
       const keywords = data.regeocode.formatted_address
@@ -90,7 +84,7 @@ class GmMap extends React.Component {
         ...this.state.center,
         address: keywords
       })
-      this.hasCallBack = true
+      this.useOnGetLocation = true
     }
   }
 
@@ -109,7 +103,7 @@ class GmMap extends React.Component {
     const { warning, center } = this.props
     this.setState({
       iptFocus: false,
-      showWarning: warning && !this.hasCallBack && !center
+      showWarning: warning && !this.useOnGetLocation && !center
     })
   }
 
