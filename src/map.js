@@ -3,6 +3,7 @@ import { Map, Marker } from 'react-amap'
 import _ from 'lodash'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
+import SvgClose from '../svg/close.svg'
 import './index.less'
 
 const url = 'https://restapi.amap.com/v3/assistant/inputtips'
@@ -171,9 +172,9 @@ class GmMap extends React.Component {
           />
           {
             keywords && keywords.length
-              ? <i
+              ? <SvgClose
                 onClick={this.handleCleanKeywords}
-                className={classNames('gm-map-icon', 'xfont', 'xfont-close-circle')}
+                className='gm-map-icon'
               />
               : null
           }

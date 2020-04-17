@@ -1,7 +1,6 @@
 import Map from '../src/index'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import 'gm-xfont/iconfont.css'
 
 class App extends React.Component {
   constructor () {

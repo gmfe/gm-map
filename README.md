@@ -6,7 +6,6 @@ gm-map组件是基于饿了么开发的react-amap组件的再封装，使用高�
 ## 使用前请确保安装了以下依赖
 - lodash
 - react-amap
-- gm-xfont
 - react
 - classnames
 - prop-types
