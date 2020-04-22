@@ -23,31 +23,11 @@ class GmMap extends React.Component {
       mask: true
     }
     this.iptRef = React.createRef()
-    this.hasInitialCenter = !!props.center
-    this.useOnGetLocation = false // 是否调用了getLocation
     // map实例
     this.map = null
     this.mapEvents = {
       created: m => {
         this.map = m
-        // 处理获取地图实例比获取props.center慢的特殊情况
-        if (!this.hasInitialCenter && this.props.center && this.state.center) this.useOnGetLocation = true
-      },
-      mapmove: () => {
-        const center = this.map.getCenter()
-        const preCenter = this.state.center
-        this.debounceHandleMapMove(center)
-        // 只有满足条件才setstate，因为传入Map组件的center是一个对象
-        // 检查发现无论这个center的经纬度是否与之前相等，都会导致Map内部去触发mapmove事件，最终导致死循环
-        if (!this.hasInitialCenter && !this.useOnGetLocation && this.props.center) return
-        if (!preCenter || (preCenter.longitude !== center.lng && preCenter.latitude !== center.lat)) {
-          this.setState({
-            center: {
-              longitude: center.lng,
-              latitude: center.lat
-            }
-          })
-        }
       }
     }
 
@@ -62,7 +42,7 @@ class GmMap extends React.Component {
     if (center && (!preProps.center || (preProps.center.latitude !== center.latitude || preProps.center.longitude !== center.longitude))) {
       // 性能优化
       const centerDiff = !stateCenter || (stateCenter.latitude !== center.latitude && stateCenter.longitude !== center.longitude)
-      if (!this.useOnGetLocation && centerDiff) {
+      if (centerDiff) {
         this.setState({
           center,
           showWarning: false,
@@ -85,7 +65,6 @@ class GmMap extends React.Component {
         ...this.state.center,
         address: keywords
       })
-      this.useOnGetLocation = true
     }
   }
 
@@ -104,7 +83,7 @@ class GmMap extends React.Component {
     const { warning, center } = this.props
     this.setState({
       iptFocus: false,
-      showWarning: warning && !this.useOnGetLocation && !center
+      showWarning: warning && !center
     })
   }
 
@@ -122,18 +101,21 @@ class GmMap extends React.Component {
 
   handleCleanKeywords = () => { this.setState({ keywords: '', tips: [] }) }
 
-  async handleTipsClick (item) {
-    let arr = []
-    arr = item.location.split(',')
+  handleTipsClick (item) {
+    const [longitude, latitude] = item.location.split(',')
+    const center = {
+      longitude,
+      latitude
+    }
+    const address = `${item.district}${item.name}`
     this.setState({
-      center: {
-        longitude: arr[0],
-        latitude: arr[1]
-      },
-      keywords: `${item.district}${item.name}`,
-      showList: false
+      center,
+      keywords: address,
+      showList: false,
+      showWarning: false
     })
-    this.debounceGetTips(`${item.district}${item.name}`)
+    this.debounceGetTips(address)
+    this.props.onGetLocation({ address, longitude, latitude })
   }
 
   handleMask = () => {
@@ -149,13 +131,25 @@ class GmMap extends React.Component {
     })
   }
 
+  handleCenter = () => {
+    const center = this.map.getCenter()
+    this.debounceHandleMapMove(center)
+    this.setState({
+      center: {
+        longitude: center.lng,
+        latitude: center.lat
+      }
+    })
+  }
+
   render () {
     const { keywords, tips, showWarning, iptFocus, center, mask } = this.state
     const { placeholder, inputFocusColor } = this.props
     const mapCenter = center ? { center } : {}
     const markerCenter = center ? { position: center } : {}
+
     return (
-      <div className='gm-map'>
+      <div className='gm-map' >
         <div className='gm-map-ipt-wrap'>
           <input
             className={classNames('gm-map-ipt')}
@@ -179,7 +173,7 @@ class GmMap extends React.Component {
               : null
           }
         </div>
-        <div className='gm-map-amap'>
+        <div className='gm-map-amap' onTouchEnd={this.handleCenter} onMouseUp={this.handleCenter}>
           <Map
             version='1.4.6'
             zoom={this.props.zoom}

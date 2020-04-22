@@ -12,7 +12,14 @@ class App extends React.Component {
     }
   }
 
+  componentDidMount () {
+    setTimeout(() => {
+      this.setLocation({ address: '上海外滩', longitude: '121.492156', latitude: '31.233462' })
+    }, 2000)
+  }
+
   setLocation = e => {
+    console.log(e, 'e')
     this.setState({
       longitude: e.longitude,
       latitude: e.latitude,
