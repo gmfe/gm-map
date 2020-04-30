@@ -9,37 +9,36 @@
   width: 100%;
   height: 100%;
   position: relative;
-  display: flex;
-  flex-direction: column;
 
   .gm-m-map-input-wrap {
-    padding: 6px;
-    height: 24px;
+    padding: 10px;
     display: flex;
+    font-size: 16px;
     background: #fff;
 
     .gm-m-map-input-container {
-      height: 100%;
       width: 100%;
       position: relative;
 
       input {
         border-radius: 20px;
-        padding:5px 20px 5px 8px;
-        height: 100%;
+        font-size: 18px;
+        line-height: 18px;
+        padding: 8px 20px 8px 10px;
         width: 100%;
         box-sizing: border-box;
+        box-shadow: none;
+        border: none;
         outline: none;
         background: #eee;
-        border: 1px solid rgb(238, 238, 238);
       }
 
       .gm-m-map-close {
-        font-size: 14px;
+        font-size: 16px;
         color: #999;
         position: absolute;
         right: 6px;
-        top: 6px;
+        top: 12px;
       }
     }
 
@@ -47,22 +46,25 @@
       flex: 1 0 auto;
       text-align: center;
       color: #56a3f2;
-      font-size: 14px;
-      padding: 2px 5px;
+      font-size: 18px;
+      padding: 6px 5px;
     }
   }
 
   .gm-m-map-search {
     position: absolute;
-    top: 30px;
+    top: 54px;
     bottom: 0;
     width: 100%;
     z-index: 999;
   }
 
   .gm-m-map-amap {
+    display: none;
+    height: 100%;
+    width: 100%;
     position: relative;
-    flex: 1 0 auto;
+    flex: 1 1 auto;
 
     .gm-m-map-location {
       position: absolute;
@@ -70,6 +72,11 @@
       left: 50%;
       font-size: 26px;
     }
+  }
+
+  .gm-m-map-footer {
+    height: 1000px;
+    flex: 1 1 auto;
   }
 
   .gm-m-map-tips {

@@ -125,10 +125,12 @@ class MobileMap extends React.Component {
             events={this.mapEvents}
             amapkey={amapkey}
           />
-          <SvgLocation className='gm-m-map-location'/>
+          {/*<SvgLocation className='gm-m-map-location'/>*/}
         </div>
 
-        <TipList handleSelect={this.handleSelect} list={tips} style={{ height: '300px' }}/>
+        <div className='gm-m-map-footer'>
+          <TipList handleSelect={this.handleSelect} list={tips} style={{ height: '100%' }}/>
+        </div>
       </div>
     )
   }
