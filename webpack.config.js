@@ -4,7 +4,7 @@ const path = require("path");
 module.exports = {
   mode: "development",
   entry: {
-    demo: "./demo/index.js",
+    demo: "./mobile_demo/index.js",
   },
   output: {
     path: path.resolve("build"),
