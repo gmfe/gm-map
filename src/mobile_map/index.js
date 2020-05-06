@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { Map } from 'react-amap'
 import SvgClose from '../../svg/close.svg'
 import SvgLocation from '../../svg/location.svg'
@@ -26,7 +26,7 @@ class MobileMap extends React.Component {
       inputValue: '',
       location: props.location
     }
-    this.debounceGetTips = _.debounce(this.getSearchList, 100)
+    this.debounceSearch = _.debounce(this.getSearchList, 100)
   }
 
   componentDidMount () {
@@ -62,7 +62,7 @@ class MobileMap extends React.Component {
     this.setState({
       inputValue: value
     })
-    value && this.debounceGetTips(value)
+    value && this.debounceSearch(value)
   }
 
   async getSearchList (value) {
@@ -87,9 +87,11 @@ class MobileMap extends React.Component {
     this.setState({ tips, location: { longitude: lng, latitude: lat } })
   }
 
-  handleTouchEnd = async () => {
-    const { lng, lat } = this.mapInstance.getCenter()
-    this.getTips(lng, lat)
+  handleTouchEnd = () => {
+    setTimeout(() => {
+      const { lng, lat } = this.mapInstance.getCenter()
+      this.getTips(lng, lat)
+    }, 200)
   }
 
   render () {
@@ -103,34 +105,39 @@ class MobileMap extends React.Component {
     return (
       <div className='gm-m-map'>
 
-        <div className='gm-m-map-input-wrap'>
+        <div className='gm-m-map-top'>
           <div className='gm-m-map-input-container'>
-            <input type='text' placeholder={placeholder} value={inputValue}
-               onChange={this.handleSearch}
-               onFocus={this.handleSetShowSearch.bind(this, true)}/>
+            <input
+              type='text'
+              placeholder={placeholder}
+              value={inputValue}
+              onChange={this.handleSearch}
+              onFocus={this.handleSetShowSearch.bind(this, true)}
+            />
             {inputValue.length ? <SvgClose onClick={this.handleCleanInput} className='gm-m-map-close'/> : null}
+            {showSearch && <span className='gm-m-map-cancel' onClick={this.handleSetShowSearch.bind(this, false)}>取消</span>}
           </div>
-          {showSearch && <span className='gm-m-map-cancel' onClick={this.handleSetShowSearch.bind(this, false)}>取消</span>}
         </div>
 
-        {showSearch && <div className='gm-m-map-search'>
-          <TipList handleSelect={this.handleSelect} list={searchList} style={{ height: '100%' }}/>
-        </div>}
+        {/* 搜索浮层 */}
+        {showSearch
+          ? <div className='gm-m-map-search'><TipList handleSelect={this.handleSelect} list={searchList}/></div>
+          : <Fragment>
+              <div className='gm-m-map-amap' onTouchEnd={this.handleTouchEnd}>
+                <Map
+                  version='1.4.6'
+                  zoom={zoom}
+                  {...center}
+                  events={this.mapEvents}
+                  amapkey={amapkey}
+                />
+                <SvgLocation className='gm-m-map-location'/>
+              </div>
 
-        <div className='gm-m-map-amap' onTouchEnd={this.handleTouchEnd}>
-          <Map
-            version='1.4.6'
-            zoom={zoom}
-            {...center}
-            events={this.mapEvents}
-            amapkey={amapkey}
-          />
-          {/*<SvgLocation className='gm-m-map-location'/>*/}
-        </div>
-
-        <div className='gm-m-map-footer'>
-          <TipList handleSelect={this.handleSelect} list={tips} style={{ height: '100%' }}/>
-        </div>
+              <div className='gm-m-map-bottom'>
+                <TipList handleSelect={this.handleSelect} list={tips}/>
+              </div>
+        </Fragment>}
       </div>
     )
   }

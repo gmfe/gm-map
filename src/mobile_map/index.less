@@ -1,6 +1,10 @@
+@top-height: 58px;
+@bottom-height: 60%;
+
 .amap-logo {
   display: none !important;
 }
+
 .amap-copyright {
   display: none !important;
 }
@@ -10,22 +14,26 @@
   height: 100%;
   position: relative;
 
-  .gm-m-map-input-wrap {
-    padding: 10px;
-    display: flex;
-    font-size: 16px;
+  .gm-m-map-top {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: @top-height;
     background: #fff;
 
     .gm-m-map-input-container {
-      width: 100%;
+      display: flex;
+      align-items: center;
       position: relative;
+      margin: 10px;
 
       input {
         border-radius: 20px;
         font-size: 18px;
-        line-height: 18px;
-        padding: 8px 20px 8px 10px;
+        padding: 0 20px;
+        height: 34px;
         width: 100%;
+        -webkit-appearance: none;
         box-sizing: border-box;
         box-shadow: none;
         border: none;
@@ -37,8 +45,8 @@
         font-size: 16px;
         color: #999;
         position: absolute;
-        right: 6px;
-        top: 12px;
+        right: 52px;
+        top: 9px;
       }
     }
 
@@ -46,42 +54,46 @@
       flex: 1 0 auto;
       text-align: center;
       color: #56a3f2;
+      margin-left: 5px;
       font-size: 18px;
-      padding: 6px 5px;
     }
   }
 
-  .gm-m-map-search {
-    position: absolute;
-    top: 54px;
-    bottom: 0;
-    width: 100%;
-    z-index: 999;
-  }
-
   .gm-m-map-amap {
-    display: none;
-    height: 100%;
+    position: absolute;
+    top: @top-height;
+    bottom: @bottom-height;
     width: 100%;
-    position: relative;
     flex: 1 1 auto;
 
     .gm-m-map-location {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: auto;
       font-size: 26px;
     }
   }
 
-  .gm-m-map-footer {
-    height: 1000px;
-    flex: 1 1 auto;
+  .gm-m-map-bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: @bottom-height;
+  }
+
+  .gm-m-map-search {
+    position: absolute;
+    top: 50px;
+    bottom: 0;
+    width: 100%;
   }
 
   .gm-m-map-tips {
     width: 100%;
-    // box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+    height: 100%;
     z-index: 940;
     background: #fff;
     overflow-y: auto;
