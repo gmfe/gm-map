@@ -191,7 +191,7 @@ class GmMap extends React.Component {
               return <li
                 className='gm-map-result-item'
                 onClick={this.handleTipsClick.bind(this, item)}
-                key={`${item.district}${item.name}`}
+                key={`${item.id}${item.name}`}
               >
                 <div className='gm-map-result-name'>{item.name}</div>
                 <div className='gm-map-result-district'>{`${item.district}${item.address}`}</div>
