@@ -12,7 +12,7 @@ function TipList ({ list, handleSelect, ...rest }) {
       {
         list.map(item => <div
           className='gm-m-map-tips-item'
-          key={`${item.district}${item.name}`}
+          key={`${item.id}${item.name}`}
           onClick={handleSelect.bind(null, item)}
         >
           <div className='item-name'>{item.name}</div>

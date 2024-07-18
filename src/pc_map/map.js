@@ -31,8 +31,8 @@ class GmMap extends React.Component {
       }
     }
 
-    this.debounceHandleMapMove = _.debounce(this.handleMapMove, 80)
-    this.debounceGetTips = _.debounce(this.getTips, 80)
+    this.debounceHandleMapMove = _.debounce(this.handleMapMove, 400)
+    this.debounceGetTips = _.debounce(this.getTips, 400)
   }
 
   componentDidUpdate (preProps) {

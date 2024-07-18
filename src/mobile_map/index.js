@@ -26,7 +26,7 @@ class MobileMap extends React.Component {
       inputValue: '',
       location: props.location
     }
-    this.debounceSearch = _.debounce(this.getSearchList, 100)
+    this.debounceSearch = _.debounce(this.getSearchList, 500)
   }
 
   componentDidMount () {
