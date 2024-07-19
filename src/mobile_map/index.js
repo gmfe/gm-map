@@ -66,6 +66,10 @@ class MobileMap extends React.Component {
   }
 
   async getSearchList (value) {
+    // 如果是去除前后空格是空值，就不请求接口
+    if (!_.trim(value)) {
+      return
+    }
     const data = await window.fetch(`${INPUT_TIP_URL}?key=${this.props.amapkey}&keywords=${value}`).then(res => res.json()).catch(err => { console.error(err) })
     if (data.status === '1') {
       // 过滤掉不合法的item
@@ -123,21 +127,21 @@ class MobileMap extends React.Component {
         {showSearch
           ? <div className='gm-m-map-search'><TipList handleSelect={this.handleSelect} list={searchList}/></div>
           : <Fragment>
-              <div className='gm-m-map-amap' onTouchEnd={this.handleTouchEnd}>
-                <Map
-                  version='1.4.6'
-                  zoom={zoom}
-                  {...center}
-                  events={this.mapEvents}
-                  amapkey={amapkey}
-                />
-                <SvgLocation className='gm-m-map-location'/>
-              </div>
+            <div className='gm-m-map-amap' onTouchEnd={this.handleTouchEnd}>
+              <Map
+                version='1.4.6'
+                zoom={zoom}
+                {...center}
+                events={this.mapEvents}
+                amapkey={amapkey}
+              />
+              <SvgLocation className='gm-m-map-location'/>
+            </div>
 
-              <div className='gm-m-map-bottom'>
-                <TipList handleSelect={this.handleSelect} list={tips}/>
-              </div>
-        </Fragment>}
+            <div className='gm-m-map-bottom'>
+              <TipList handleSelect={this.handleSelect} list={tips}/>
+            </div>
+          </Fragment>}
       </div>
     )
   }

@@ -31,7 +31,7 @@ class GmMap extends React.Component {
       }
     }
 
-    this.debounceHandleMapMove = _.debounce(this.handleMapMove, 400)
+    this.debounceHandleMapMove = _.debounce(this.handleMapMove, 200)
     this.debounceGetTips = _.debounce(this.getTips, 400)
   }
 
@@ -69,6 +69,10 @@ class GmMap extends React.Component {
   }
 
   async getTips (value) {
+    // 如果是去除前后空格是空值，就不请求接口
+    if (!_.trim(value)) {
+      return
+    }
     const data = await window.fetch(`${url}?key=${this.props.amapkey}&keywords=${value}`).then(res => res.json()).catch(err => { console.error(err) })
     if (data.status === '1') {
       // 过滤掉不合法的item
