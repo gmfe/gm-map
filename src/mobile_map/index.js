@@ -42,7 +42,7 @@ class MobileMap extends React.Component {
       address,
       longitude,
       latitude
-    })
+    }, item)
   }
 
   handleSetShowSearch = (bool) => {
