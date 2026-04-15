@@ -70,7 +70,10 @@ class MobileMap extends React.Component {
     if (!_.trim(value)) {
       return
     }
-    const data = await window.fetch(`${INPUT_TIP_URL}?key=${this.props.amapkey}&keywords=${value}`).then(res => res.json()).catch(err => { console.error(err) })
+    const { amapkey, inputTipWithLocation, location } = this.props
+    const hasLngLat = location && location.longitude != null && location.latitude != null && `${location.longitude}` !== '' && `${location.latitude}` !== ''
+    const locationParam = inputTipWithLocation && hasLngLat ? `&location=${location.longitude},${location.latitude}` : ''
+    const data = await window.fetch(`${INPUT_TIP_URL}?key=${amapkey}&keywords=${value}${locationParam}`).then(res => res.json()).catch(err => { console.error(err) })
     if (data.status === '1') {
       // 过滤掉不合法的item
       const searchList = _.filter(data.tips, item => typeof item.id === 'string')
