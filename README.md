@@ -20,6 +20,10 @@ gm-map组件是基于饿了么开发的react-amap组件的再封装，使用高�
 6. inputFocusColor（String),搜索框的边框颜色。
 7. warning (Bool), 值为true时，当组件的状态为**错误**时，给出一个警告。
 8. placeholder (String), 设置搜索框的placeholder。
+9. location (Obj), `{ longitude, latitude }`，初始化地图的中心位置。**2.2.0 起支持动态更新**：组件挂载后修改该 prop，地图会平滑移动（panTo）到新位置并刷新周边地点列表。周边列表（place/around）请求进行中会临时禁用地图拖动，响应按序号丢弃过期结果。
+10. currentLocation (Obj), `{ longitude, latitude }`，定位点标记坐标。传入后地图上渲染蓝色定位圆点，更新坐标则标记跟随移动，传 `null`/不传则不展示。（2.2.0 新增）
+11. children (ReactNode)，渲染在地图区域内的自定义悬浮层插槽（如「回到当前位置」按钮），需要自行绝对定位。（2.2.0 新增）
+12. inputTipWithLocation (Bool)，为 `true` 时关键词搜索（inputtips）请求携带位置参数，实现按距离排序的结果优先。位置参考取值：优先最近一次外部设置（初始 location 或后续动态更新，即定位坐标），无定位时取当前地图中心。
 
 ## 本地测试
 **npm install**  安装依赖
