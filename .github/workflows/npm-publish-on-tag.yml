@@ -32,7 +32,13 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Publish (token)
-        run: npm publish --access public
         env:
+          TAG_NAME: ${{ github.ref_name }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [[ "$TAG_NAME" == *-* ]]; then
+            npm publish --access public --tag beta
+          else
+            npm publish --access public
+          fi
 
