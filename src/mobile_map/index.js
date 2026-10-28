@@ -315,8 +315,15 @@ class MobileMap extends React.Component {
                 amapkey={amapkey}
               />
               <SvgLocation className='gm-m-map-location'/>
-              {/* 插槽：地图区域内的自定义悬浮层（如定位按钮），自行绝对定位 */}
-              {children}
+              {/* 插槽：地图区域内的自定义悬浮层（如定位按钮），自行绝对定位。
+                  拦截 touchend 冒泡：点击插槽内按钮不应视为地图拖动结束，
+                  避免多打一次周边请求并把地图锁住 */}
+              <div
+                className='gm-m-map-slot'
+                onTouchEnd={(e) => e.stopPropagation()}
+              >
+                {children}
+              </div>
             </div>
 
             <div className='gm-m-map-bottom'>
