@@ -42,6 +42,8 @@ class MobileMap extends React.Component {
     // 与地图实例同源的 AMap 引用：页面可能因定位等能力重复加载 AMap 脚本导致 window.AMap 被替换，
     // 用替换后的 Marker 类往旧地图实例上挂标记会静默失败，故必须以 created 时刻的 AMap 为准
     this.mapAMap = null
+    // 周边列表慢请求 loading 的显示延时句柄
+    this.tipsLoadingTimer = null
     this.mapEvents = {
       created: (m) => {
         this.mapInstance = m
@@ -62,9 +64,15 @@ class MobileMap extends React.Component {
       searchList: [],
       showSearch: false,
       inputValue: '',
-      location: props.location
+      location: props.location,
+      // 周边列表请求慢时显示地图顶部 loading
+      tipsLoading: false
     }
     this.debounceSearch = _.debounce(this.getSearchList, 500)
+  }
+
+  componentWillUnmount () {
+    this.tipsLoadingTimer && clearTimeout(this.tipsLoadingTimer)
   }
 
   componentDidMount () {
@@ -162,6 +170,11 @@ class MobileMap extends React.Component {
     const seq = ++this.tipsSeq
     // 周边请求进行中禁止拖动地图，避免请求期间地图又被拖走、结果与视野错位
     this.setDragEnable(false)
+    // 慢请求（超过 300ms 仍未返回）才显示 loading，避免快速响应时闪烁
+    this.tipsLoadingTimer && clearTimeout(this.tipsLoadingTimer)
+    this.tipsLoadingTimer = setTimeout(() => {
+      this.setState({ tipsLoading: true })
+    }, 300)
     try {
       const location = `${lng},${lat}`
       const data = await window
@@ -190,7 +203,10 @@ class MobileMap extends React.Component {
     } finally {
       // 仅最新一次请求负责解锁，避免早先的请求提前解锁
       if (seq === this.tipsSeq) {
+        this.tipsLoadingTimer && clearTimeout(this.tipsLoadingTimer)
+        this.tipsLoadingTimer = null
         this.setDragEnable(true)
+        this.setState({ tipsLoading: false })
       }
     }
   }
@@ -262,7 +278,8 @@ class MobileMap extends React.Component {
 
   render () {
     const { zoom, amapkey, placeholder, children } = this.props
-    const { tips, showSearch, inputValue, searchList, location } = this.state
+    const { tips, showSearch, inputValue, searchList, location, tipsLoading } =
+      this.state
     // center 必须传稳定引用（state.location 本身）：
     // 若每次渲染新建对象，react-amap 会因引用变化误判 center 改变而 setCenter，
     // 把地图拽回旧中心并打断 panTo 平滑动画
@@ -314,6 +331,12 @@ class MobileMap extends React.Component {
                 events={this.mapEvents}
                 amapkey={amapkey}
               />
+              {/* 周边列表慢请求（地图拖动锁定中）时顶部 loading 反馈 */}
+              {tipsLoading ? (
+                <div className='gm-m-map-loading'>
+                  <span className='gm-m-map-loading-icon'/>
+                </div>
+              ) : null}
               <SvgLocation className='gm-m-map-location'/>
               {/* 插槽：地图区域内的自定义悬浮层（如定位按钮），自行绝对定位。
                   拦截 touchend 冒泡：点击插槽内按钮不应视为地图拖动结束，

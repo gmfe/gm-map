@@ -1,6 +1,12 @@
 @top-height: 58px;
 @bottom-height: 60%;
 
+@keyframes gm-m-map-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .amap-logo {
   display: none !important;
 }
@@ -66,6 +72,32 @@
     bottom: @bottom-height;
     width: 100%;
     flex: 1 1 auto;
+
+    .gm-m-map-loading {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      z-index: 200;
+      width: 32px;
+      height: 32px;
+      margin-left: -16px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+
+      .gm-m-map-loading-icon {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #d9d9d9;
+        border-top-color: #1a66ff;
+        border-radius: 50%;
+        animation: gm-m-map-loading-spin 0.8s linear infinite;
+      }
+    }
 
     .gm-m-map-location {
       position: absolute;
